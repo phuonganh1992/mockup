@@ -17,12 +17,16 @@
 package com.cloudrun.microservicetemplate;
 
 import javax.annotation.PreDestroy;
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /** Microservice template for Cloud Run. */
+@OpenAPIDefinition(info = @Info(title = "Wallet api", description = "This is api docs for wallet in MA"))
 @SpringBootApplication
 public class MicroserviceTemplateApplication {
   private static final Logger logger =

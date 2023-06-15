@@ -16,30 +16,107 @@
 
 package com.cloudrun.microservicetemplate;
 
+import com.cloudrun.microservicetemplate.model.command.CustomerCriteria;
+import com.cloudrun.microservicetemplate.model.command.EWalletCriteria;
+import com.cloudrun.microservicetemplate.model.command.TransactionCriteria;
+import com.cloudrun.microservicetemplate.model.view.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.ByteArrayInputStream;
 
 /** Example REST controller to demonstrate structured logging. */
 @RestController
+@RequestMapping("/api/wallets")
 public class MicroserviceController {
   // 'spring-cloud-gcp-starter-logging' module provides support for
   // associating a web request trace ID with the corresponding log entries.
   // https://cloud.spring.io/spring-cloud-gcp/multi/multi__stackdriver_logging.html
   private static final Logger logger = LoggerFactory.getLogger(MicroserviceController.class);
 
-  /** Example endpoint handler. */
-  @GetMapping("/")
-  public @ResponseBody String index() {
-    // Example of structured logging - add custom fields
-    MDC.put("logField", "custom-entry");
-    MDC.put("arbitraryField", "custom-entry");
-    // Use logger with log correlation
-    // https://cloud.google.com/run/docs/logging#correlate-logs
-    logger.info("Structured logging example.");
-    return "Hello World!";
+//  /** Example endpoint handler. */
+//  @GetMapping("/")
+//  public @ResponseBody String index() {
+//    // Example of structured logging - add custom fields
+//    MDC.put("logField", "custom-entry");
+//    MDC.put("arbitraryField", "custom-entry");
+//    // Use logger with log correlation
+//    // https://cloud.google.com/run/docs/logging#correlate-logs
+//    logger.info("Structured logging example.");
+//    return "Hello World!";
+//  }
+@Operation(description = "Báo cáo danh sách ví")
+@GetMapping("")
+public ResponseEntity<ItemSearchView<UserView>> filter(EWalletCriteria criteria) {
+  return ResponseEntity.ok(new ItemSearchView());
+}
+
+  @Operation(description = "Download danh sách ví")
+  @PostMapping("/download")
+  public ResponseEntity<InputStreamResource> downloadReport(@RequestBody EWalletCriteria criteria) {
+    byte[] bytes = new byte[100000000];
+    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+    InputStreamResource inputStreamResource = new InputStreamResource(byteArrayInputStream);
+    HttpHeaders headers = new HttpHeaders();
+    String fileName = "result.xlsx";
+    headers.add("Content-Disposition", "attachment; filename=" + fileName);
+    headers.add("Content-Encoding", "UTF-8");
+    headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+    return ResponseEntity.ok().headers(headers).body(inputStreamResource);
+  }
+
+  @Operation(description = "Báo cáo chi tiết khách hàng")
+  @Parameter(name = "id", description = "Id của ví")
+  @GetMapping("/{id}")
+  public ResponseEntity<ItemSearchView<UserDetailView>> findById(@PathVariable("id") String id, CustomerCriteria criteria) {
+    return ResponseEntity.ok(new ItemSearchView());
+  }
+
+  @Operation(description = "Báo cáo giao dịch")
+  @GetMapping("/transactions")
+  public ResponseEntity<ItemSearchView<TransactionReportView>> filterTransaction(TransactionCriteria command) {
+    return ResponseEntity.ok(new ItemSearchView());
+  }
+
+  @Operation(description = "Download báo cáo giao dịch")
+  @PostMapping("/transactions/download")
+  public ResponseEntity<InputStreamResource> downloadReportTransaction(@RequestBody TransactionCriteria criteria) {
+    byte[] bytes = new byte[100000000];
+    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+    InputStreamResource inputStreamResource = new InputStreamResource(byteArrayInputStream);
+    HttpHeaders headers = new HttpHeaders();
+    String fileName = "result.xlsx";
+    headers.add("Content-Disposition", "attachment; filename=" + fileName);
+    headers.add("Content-Encoding", "UTF-8");
+    headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+    return ResponseEntity.ok().headers(headers).body(inputStreamResource);
+  }
+
+  @Operation(description = "Báo cáo khách hàng cá nhân")
+  @GetMapping("/customers")
+  public ResponseEntity<ItemSearchView<CustomerReportView>> filterCustomer(CustomerCriteria criteria) {
+    return ResponseEntity.ok(new ItemSearchView());
+  }
+
+  @Operation(description = "Download báo cáo khách hàng cá nhân")
+  @PostMapping("/customers/download")
+  public ResponseEntity<InputStreamResource> downloadReportCustomer(@RequestBody CustomerCriteria criteria) {
+    byte[] bytes = new byte[100000000];
+    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+    InputStreamResource inputStreamResource = new InputStreamResource(byteArrayInputStream);
+    HttpHeaders headers = new HttpHeaders();
+    String fileName = "result.xlsx";
+    headers.add("Content-Disposition", "attachment; filename=" + fileName);
+    headers.add("Content-Encoding", "UTF-8");
+    headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+    return ResponseEntity.ok().headers(headers).body(inputStreamResource);
   }
 }
